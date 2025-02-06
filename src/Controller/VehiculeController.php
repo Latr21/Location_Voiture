@@ -56,7 +56,6 @@ final class VehiculeController extends AbstractController
             // Associer automatiquement le commentaire au véhicule et à l'utilisateur connecté
             $commentaire->setVehicule($vehicule);
             $commentaire->setClient($this->getUser());
-            $commentaire->setCreatedAt(new \DateTimeImmutable());
 
             $entityManager->persist($commentaire);
             $entityManager->flush();
