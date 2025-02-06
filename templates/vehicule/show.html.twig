@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails du Véhicule{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1>Détails du Véhicule</h1>
+
+        <p><strong>Marque :</strong> {{ vehicule.marque }}</p>
+        <p><strong>Immatriculation :</strong> {{ vehicule.immatriculation }}</p>
+        <p><strong>Prix Journalier :</strong> {{ vehicule.prixJournalier }}€</p>
+
+        <h2>Avis des utilisateurs</h2>
+        {% for commentaire in vehicule.commentaires %}
+            <div class="card my-2">
+                <div class="card-body">
+                    <p>{{ commentaire.contenu }}</p>
+<small>Par {{ commentaire.client.email }}</small>                </div>
+            </div>
+        {% else %}
+            <p>Aucun avis pour ce véhicule.</p>
+        {% endfor %}
+
+        {% if app.user %}
+            <h2>Laisser un avis</h2>
+            {{ form_start(commentaire_form) }}
+                {{ form_widget(commentaire_form) }}
+                <button type="submit" class="btn btn-primary mt-2">Soumettre</button>
+            {{ form_end(commentaire_form) }}
+        {% else %}
+            <p class="alert alert-warning">Vous devez être connecté pour laisser un avis.</p>
+        {% endif %}
+    </div>
+{% endblock %}
