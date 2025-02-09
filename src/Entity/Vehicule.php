@@ -6,8 +6,12 @@ use App\Repository\VehiculeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: VehiculeRepository::class)]
+#[Vich\Uploadable]
 class Vehicule
 {
     #[ORM\Id]
@@ -22,11 +26,25 @@ class Vehicule
     private ?string $immatriculation = null;
 
     #[ORM\Column]
-    private ?float $prixjournalier = null;
+#[Assert\NotNull(message: "Le prix journalier est obligatoire.")]
+#[Assert\Type(type: 'numeric', message: "Le prix journalier doit être un nombre.")]
+#[Assert\Range(
+    min: 100,
+    max: 500,
+    notInRangeMessage: "Le prix journalier doit être compris entre {{ min }}€ et {{ max }}€."
+)]
+private ?float $prixjournalier = null;
 
     #[ORM\Column]
     private ?bool $disponible = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?string $image = null;
+
+    #[Vich\UploadableField(mapping: "profil", fileNameProperty: "image")]
+    private ?File $imageFile = null;
+
+   
     /**
      * @var Collection<int, Reservation>
      */
@@ -58,7 +76,6 @@ class Vehicule
     public function setMarque(string $marque): static
     {
         $this->marque = $marque;
-
         return $this;
     }
 
@@ -70,7 +87,6 @@ class Vehicule
     public function setImmatriculation(string $immatriculation): static
     {
         $this->immatriculation = $immatriculation;
-
         return $this;
     }
 
@@ -82,7 +98,6 @@ class Vehicule
     public function setPrixjournalier(float $prixjournalier): static
     {
         $this->prixjournalier = $prixjournalier;
-
         return $this;
     }
 
@@ -94,9 +109,35 @@ class Vehicule
     public function setDisponible(bool $disponible): static
     {
         $this->disponible = $disponible;
-
         return $this;
     }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): self
+    {
+        $this->image = $image;
+        return $this;
+    }
+
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
+
+    public function setImageFile(?File $imageFile = null): void
+    {
+        $this->imageFile = $imageFile;
+
+        if ($imageFile) {
+            $this->updatedAt = new \DateTimeImmutable();
+        }
+    }
+
+   
 
     /**
      * @return Collection<int, Reservation>
@@ -119,7 +160,6 @@ class Vehicule
     public function removeReservation(Reservation $reservation): static
     {
         if ($this->reservations->removeElement($reservation)) {
-            // set the owning side to null (unless already changed)
             if ($reservation->getVehicule() === $this) {
                 $reservation->setVehicule(null);
             }
@@ -149,7 +189,6 @@ class Vehicule
     public function removeCommentaire(Commentaire $commentaire): static
     {
         if ($this->commentaires->removeElement($commentaire)) {
-            // set the owning side to null (unless already changed)
             if ($commentaire->getVehicule() === $this) {
                 $commentaire->setVehicule(null);
             }

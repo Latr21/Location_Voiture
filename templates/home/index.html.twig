@@ -1,40 +1,39 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Accueil{% endblock %}
+{% block title %}Accueil - Location de Véhicules{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
-    <h1 class="text-center">Liste des Véhicules 🚗</h1>
+    <div class="container mt-5">
+        <h1 class="text-center">Nos Véhicules Disponibles 🚗</h1>
 
-    {% if vehiculeInfos is empty %}
-        <div class="alert alert-warning text-center">Aucun véhicule disponible pour le moment.</div>
-    {% else %}
         <div class="row">
-            {% for vehiculeInfo in vehiculeInfos %}
+            {% for vehicule in vehicules %}
                 <div class="col-md-4">
-                    <div class="card mb-4">
+                    <div class="card mb-4 shadow-sm">
+                        {% if vehicule.image %}
+                            <img src="{{ asset('images/' ~ vehicule.image) }}" class="card-img-top" alt="Image du véhicule">
+                        {% else %}
+                            <img src="{{ asset('images/default-car.jpg') }}" class="card-img-top" alt="Image par défaut">
+                        {% endif %}
                         <div class="card-body">
-                            <h5 class="card-title">{{ vehiculeInfo.vehicule.marque }}</h5>
+                            <h5 class="card-title">{{ vehicule.marque }}</h5>
                             <p class="card-text">
-                                <strong>Immatriculation :</strong> {{ vehiculeInfo.vehicule.immatriculation }}<br>
-                                <strong>Prix Journalier :</strong> {{ vehiculeInfo.vehicule.prixJournalier }}€<br>
-                                <strong>Note Moyenne :</strong> {{ vehiculeInfo.noteMoyenne }} ⭐<br>
-                                <strong>Dernier Client :</strong> {{ vehiculeInfo.dernierClient }}
-                            </p>
-                            {% if vehiculeInfo.vehicule.disponible %}
-                                {% if app.user %}
-                                    <a href="{{ path('app_reservation_new', {id: vehiculeInfo.vehicule.id}) }}" class="btn btn-success">Réserver</a>
+                                <strong>Immatriculation :</strong> {{ vehicule.immatriculation }}<br>
+                                <strong>Prix Journalier :</strong> {{ vehicule.prixjournalier }}€<br>
+                                <strong>Disponible :</strong> 
+                                {% if vehicule.disponible %}
+                                    <span class="badge bg-success">Oui</span>
                                 {% else %}
-                                    <button class="btn btn-secondary" disabled>Réserver (Connectez-vous)</button>
+                                    <span class="badge bg-danger">Non</span>
                                 {% endif %}
-                            {% else %}
-                                <button class="btn btn-secondary" disabled>Indisponible</button>
-                            {% endif %}
+                            </p>
+                            <a href="{{ path('app_vehicule_show', {'id': vehicule.id}) }}" class="btn btn-primary">Voir Détails</a>
                         </div>
                     </div>
                 </div>
+            {% else %}
+                <p class="text-center mt-4">Aucun véhicule disponible pour le moment.</p>
             {% endfor %}
         </div>
-    {% endif %}
-</div>
+    </div>
 {% endblock %}

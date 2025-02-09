@@ -23,24 +23,28 @@ class HomeController extends AbstractController
         $vehiculeInfos = [];
 
         foreach ($vehicules as $vehicule) {
-            // Calcul de la note moyenne
+            // Récupérer tous les commentaires du véhicule
             $commentaires = $commentaireRepository->findBy(['vehicule' => $vehicule]);
             $totalNotes = 0;
             $nombreNotes = count($commentaires);
 
             foreach ($commentaires as $commentaire) {
                 $note = $commentaire->getNote();
-                // S'assurer que la note est numérique avant de l'ajouter
                 if (is_numeric($note)) {
                     $totalNotes += (float) $note;
                 }
             }
 
+            // Calculer la note moyenne
             $noteMoyenne = ($nombreNotes > 0) ? round($totalNotes / $nombreNotes, 1) : "Pas encore noté";
 
             // Récupérer le dernier utilisateur ayant réservé ce véhicule
             $reservations = $reservationRepository->findBy(['vehicule' => $vehicule], ['dateDebut' => 'DESC'], 1);
-            $dernierClient = (count($reservations) > 0) ? $reservations[0]->getClient()->getEmail() : "Aucune réservation";
+            $dernierClient = "Aucune réservation";
+
+            if (count($reservations) > 0 && $reservations[0]->getClient()) {
+                $dernierClient = $reservations[0]->getClient()->getEmail();
+            }
 
             $vehiculeInfos[$vehicule->getId()] = [
                 'vehicule' => $vehicule,
@@ -51,6 +55,7 @@ class HomeController extends AbstractController
 
         return $this->render('home/index.html.twig', [
             'vehiculeInfos' => $vehiculeInfos,
+            'vehicules' => $vehicules, // Pour éviter l'erreur Twig "Variable 'vehicules' does not exist."
         ]);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ReservationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
 class Reservation
@@ -15,9 +16,14 @@ class Reservation
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Assert\NotNull(message: "La date de début est obligatoire.")]
+    #[Assert\Type("\DateTimeInterface")]
     private ?\DateTimeInterface $dateDebut = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Assert\NotNull(message: "La date de fin est obligatoire.")]
+    #[Assert\Type("\DateTimeInterface")]
+    #[Assert\GreaterThan(propertyPath: "dateDebut", message: "La date de fin doit être après la date de début.")]
     private ?\DateTimeInterface $dateFin = null;
 
     #[ORM\Column]
@@ -43,7 +49,6 @@ class Reservation
     public function setDateDebut(\DateTimeInterface $dateDebut): static
     {
         $this->dateDebut = $dateDebut;
-
         return $this;
     }
 
@@ -55,7 +60,6 @@ class Reservation
     public function setDateFin(\DateTimeInterface $dateFin): static
     {
         $this->dateFin = $dateFin;
-
         return $this;
     }
 
@@ -67,7 +71,6 @@ class Reservation
     public function setPrixTotal(float $prixTotal): static
     {
         $this->prixTotal = $prixTotal;
-
         return $this;
     }
 
@@ -79,7 +82,6 @@ class Reservation
     public function setVehicule(?Vehicule $vehicule): static
     {
         $this->vehicule = $vehicule;
-
         return $this;
     }
 
@@ -87,7 +89,7 @@ class Reservation
     {
         return $this->client;
     }
-    
+
     public function setClient(?User $client): static
     {
         $this->client = $client;

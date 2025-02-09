@@ -4,31 +4,91 @@
 
 {% block body %}
     <div class="container mt-5">
-        <h1>Détails du Véhicule</h1>
+        <h1 class="mb-4">Détails du Véhicule</h1>
 
-        <p><strong>Marque :</strong> {{ vehicule.marque }}</p>
-        <p><strong>Immatriculation :</strong> {{ vehicule.immatriculation }}</p>
-        <p><strong>Prix Journalier :</strong> {{ vehicule.prixJournalier }}€</p>
+        <div class="row">
+            <div class="col-md-6">
+                {% if vehicule.image %}
+                    <img src="{{ asset('images/' ~ vehicule.image) }}" class="img-fluid rounded" alt="Image du véhicule">
+                {% else %}
+                    <p>Aucune image disponible.</p>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <p><strong>Marque :</strong> {{ vehicule.marque }}</p>
+                <p><strong>Immatriculation :</strong> {{ vehicule.immatriculation }}</p>
+                <p><strong>Prix Journalier :</strong> {{ vehicule.prixjournalier }}€</p>
+                <p><strong>Disponible :</strong> 
+                    {% if vehicule.disponible %}
+                        <span class="badge bg-success">Oui</span>
+                    {% else %}
+                        <span class="badge bg-danger">Non</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
 
+        <hr>
+
+        <!-- Section des commentaires -->
         <h2>Avis des utilisateurs</h2>
-        {% for commentaire in vehicule.commentaires %}
+
+        {% for commentaire in commentaires %}
             <div class="card my-2">
                 <div class="card-body">
                     <p>{{ commentaire.contenu }}</p>
-<small>Par {{ commentaire.client.email }}</small>                </div>
+                    <small>
+                        Par <strong>{{ commentaire.client.email }}</strong>
+                        {% if commentaire.note %}
+                            - Note : <strong>{{ commentaire.note }}/5 ⭐</strong>
+                        {% endif %}
+                    </small>
+                </div>
             </div>
         {% else %}
             <p>Aucun avis pour ce véhicule.</p>
         {% endfor %}
 
+        <hr>
+
+        <!-- Formulaire d'ajout de commentaire -->
         {% if app.user %}
-            <h2>Laisser un avis</h2>
+            <h3>Donner votre avis</h3>
             {{ form_start(commentaire_form) }}
-                {{ form_widget(commentaire_form) }}
-                <button type="submit" class="btn btn-primary mt-2">Soumettre</button>
+                <div class="mb-3">
+                    {{ form_label(commentaire_form.contenu, 'Votre commentaire') }}
+                    {{ form_widget(commentaire_form.contenu, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="mb-3">
+                    {{ form_label(commentaire_form.note, 'Votre note (/5)') }}
+                    {{ form_widget(commentaire_form.note, {'attr': {'class': 'form-control', 'type': 'number', 'min': 1, 'max': 5, 'step': 1}}) }}
+                </div>
+                <button type="submit" class="btn btn-primary">Envoyer</button>
             {{ form_end(commentaire_form) }}
         {% else %}
-            <p class="alert alert-warning">Vous devez être connecté pour laisser un avis.</p>
+            <p class="alert alert-info">Vous devez être connecté pour laisser un avis.</p>
         {% endif %}
+
+        <hr>
+
+        <!-- Formulaire de réservation -->
+        {% if app.user %}
+            <h3>Réserver ce véhicule</h3>
+            {{ form_start(reservation_form) }}
+                <div class="mb-3">
+                    {{ form_label(reservation_form.dateDebut, 'Date de début') }}
+                    {{ form_widget(reservation_form.dateDebut, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="mb-3">
+                    {{ form_label(reservation_form.dateFin, 'Date de fin') }}
+                    {{ form_widget(reservation_form.dateFin, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <button type="submit" class="btn btn-success">Réserver</button>
+            {{ form_end(reservation_form) }}
+        {% else %}
+            <p class="alert alert-info">Vous devez être connecté pour réserver un véhicule.</p>
+        {% endif %}
+
+        <a href="{{ path('app_vehicule_index') }}" class="btn btn-secondary mt-3">Retour à la liste</a>
     </div>
 {% endblock %}
